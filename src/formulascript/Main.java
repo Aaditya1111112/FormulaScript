@@ -1,13 +1,62 @@
 package formulascript;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        if (args.length == 0) {
+            runDemo();
+        } else if (args[0].equals("--test")) {
+            if (!TestRunner.runAll()) System.exit(1);
+        } else if (args[0].equals("--repl")) {
+            runRepl();
+        } else {
+            runFile(args[0]);
+        }
+    }
+
+    private static void runFile(String path) throws IOException {
+        Interpreter interpreter = new Interpreter();
+        for (String line : Files.readAllLines(Path.of(path))) {
+            String trimmed = line.trim();
+            if (trimmed.isEmpty() || trimmed.startsWith("#")) continue;
+            interpreter.execute(trimmed, true);
+        }
+        printCells(interpreter.symbols());
+    }
+
+    private static void runRepl() {
+        Interpreter interpreter = new Interpreter();
+        Scanner in = new Scanner(System.in);
+        System.out.println("FormulaScript REPL. Enter a formula such as A1 = 10, or 'exit' to quit.");
+        while (true) {
+            System.out.print("> ");
+            if (!in.hasNextLine()) break;
+            String line = in.nextLine().trim();
+            if (line.equals("exit")) break;
+            if (line.isEmpty()) continue;
+            interpreter.execute(line, true);
+        }
+        printCells(interpreter.symbols());
+    }
+
+    private static void printCells(SymbolTable table) {
+        header("Final cell values");
+        for (Map.Entry<String, Double> e : table.asMap().entrySet()) {
+            System.out.println(e.getKey() + " = " + Formatting.number(e.getValue()));
+        }
+    }
+
+    private static void runDemo() {
         SymbolTable symbolTable = new SymbolTable();
 
-        header("FormulaScript - Phase 1 Prototype");
+        header("FormulaScript - Phase 2");
 
         runAssignment(symbolTable, "A1 = 10");
         runAssignment(symbolTable, "B1 = 20");

@@ -59,12 +59,17 @@ public class Parser {
         return switch (t.type) {
             case NUMBER -> { advance(); yield new Node.NumberNode(t.numberValue); }
             case CELL -> { advance(); yield new Node.CellNode(t.text); }
+            case MINUS -> {
+                advance();
+                yield new Node.BinOpNode("-", new Node.NumberNode(0), parseFactor());
+            }
             case LPAREN -> {
                 advance();
                 Node expr = parseExpression();
                 expect(TokenType.RPAREN, "Expected ')'");
                 yield expr;
             }
+            case EOF -> throw new SyntaxErrorException("Unexpected end of formula");
             default -> throw new SyntaxErrorException("Unexpected '" + t.text + "'");
         };
     }
@@ -73,13 +78,17 @@ public class Parser {
         return tokens.get(pos);
     }
 
+    private String describe(Token t) {
+        return t.type == TokenType.EOF ? "end of formula" : "'" + t.text + "'";
+    }
+
     private Token advance() {
         return tokens.get(pos++);
     }
 
     private Token expect(TokenType type, String message) {
         if (peek().type != type) {
-            throw new SyntaxErrorException(message + ", found '" + peek().text + "'");
+            throw new SyntaxErrorException(message + ", found " + describe(peek()));
         }
         return advance();
     }

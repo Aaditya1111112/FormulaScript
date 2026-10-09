@@ -1,0 +1,6 @@
+# One error of each kind, with a valid line first so later lines have a cell to use
+A1 = 10
+B1 = 10 +
+C1 = A1 + X5
+D1 = 10 / 0
+E1 = 5 $ 2

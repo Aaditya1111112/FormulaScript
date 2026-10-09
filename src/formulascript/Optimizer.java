@@ -9,6 +9,7 @@ public class Optimizer {
         Node right = optimize(b.right);
 
         if (left instanceof Node.NumberNode ln && right instanceof Node.NumberNode rn) {
+            if (b.op.equals("/") && rn.value == 0) return new Node.BinOpNode(b.op, left, right);
             return new Node.NumberNode(fold(b.op, ln.value, rn.value));
         }
         if (right instanceof Node.NumberNode rn) {
